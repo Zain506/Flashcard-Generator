@@ -13,7 +13,6 @@ class mdCombine:
         self._tmp()
     def _tmp(self):
         md_files = [f for f in os.listdir(f"experiments/{self.folder}/notes") if f.endswith('.md')]
-        print(md_files)
         combined_content = ""
 
         for file in md_files:
