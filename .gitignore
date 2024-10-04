@@ -1,2 +1,5 @@
 .env
 .venv
+/experiments/experiments
+/experiments/notes
+/experiments/questions

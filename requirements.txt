@@ -1,0 +1,6 @@
+langchain
+langchain_community
+langchain_huggingface
+langchain_text_splitters
+unstructured[md] 
+nltk
