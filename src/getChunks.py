@@ -1,4 +1,5 @@
 from langchain_community.document_loaders import UnstructuredMarkdownLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from typing import List
 import re
@@ -25,9 +26,11 @@ class getChunks:
     
     # Chunk MD
     def _chunk(self, text: str) -> List[str]:
-        pattern = r'\n\d+\.\d+\s'
-        chunks = re.split(pattern, text)
-        chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size = 20000,
+            chunk_overlap = 2000,
+        )
+        chunks: List[str] = text_splitter.split_text(text)
         return chunks
     # Store each chunk into a .txt file
     def _store(self, chunks: List[str]) -> None:
