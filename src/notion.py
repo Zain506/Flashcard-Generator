@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from notion_client import Client
 from typing import List
-import ast
+import json
 import re
 load_dotenv()
 
@@ -13,21 +13,30 @@ class Notion:
         self.folder = folder
         self.id = pageID
     def run(self):
-        data: dict = self._loadDict()
-        form: List[dict] = self._makeBlocks()
-        for key, value in data.items():
-            toggle: dict = self._template(key, value)
-            form.append(toggle)
+        data: list[dict] = self._loadDict()
+        for chunk in data:
+            form: List[dict] = self._makeBlocks()
+            for key, value in chunk.items():
+                toggle: dict = self._template(key, value)
+                form.append(toggle)
         # form is the list of blocks
         # self._setup(form)
-        newform: List[List[dict]] = self._splitBlocks(form)
-        for tmp in newform:
-            self._setup(tmp)
-    def _loadDict(self) -> dict:
-        with open(f"experiments/{self.folder}/output.txt", "r") as file:
-            content = file.read()
-            data = ast.literal_eval(content)
-        return data
+            newform: List[List[dict]] = self._splitBlocks(form)
+            for tmp in newform:
+                self._setup(tmp)
+    def _loadDict(self) -> list[dict]:
+        myList: list[dict] = []
+        for chunk in os.listdir(f"experiments/{self.folder}/output/"):
+            myDict: dict = {}
+            with open(f"experiments/{self.folder}/output/{chunk}", "r") as json_file:
+                content = json_file.read()
+                dictionary: str = json.loads(content)
+                dictionary = dictionary.replace('\\', '\\\\')
+                dictionary = json.loads(dictionary)
+                for key, value in dictionary.items():
+                    myDict[key] = value
+                myList.append(myDict)
+        return myList
     def _template(self, front: str, back: str) -> dict:
         back = back.replace("\\\\", "\\").replace("{{", "{").replace("}}", "}")
         chars: list[str] = re.split(r'(\$\$.*?\$\$)', back)

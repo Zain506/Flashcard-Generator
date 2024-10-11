@@ -32,6 +32,14 @@ class Extractor:
         return [example, extract]
     def _makeQuery(self, list) -> str:
         """Use list of 2 texts to form system message"""
+        # Search to find prompt.txt - if not there, then return the standard examples prompt
+        directory: str = "examples"
+        file_path = os.path.join(directory, 'prompt.txt')
+        # prompt.txt must ask for a JSON-formatted response
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                content = file.read()
+            return content
         content = f"""
 Here is an example of some text in which definitions, lemmas, theorems, propositions and corollaries are extracted:
 
