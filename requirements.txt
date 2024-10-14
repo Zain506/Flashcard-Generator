@@ -5,3 +5,5 @@ langchain_text_splitters
 unstructured[md] 
 nltk
 notion-client
+langchain-openai
+openai
