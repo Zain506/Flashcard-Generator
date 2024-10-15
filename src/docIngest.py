@@ -19,9 +19,6 @@ class docIngest:
     def _notesLoad(self):
         src_dir = 'notes'
         dst_dir = f"experiments/{self.folder}/notes"
-        q_dir = "questions"
-        dst_dir2 = f"experiments/{self.folder}/questions"
         ex_dir = f"experiments/{self.folder}/examples"
         shutil.copytree(f"examples", ex_dir)
         shutil.copytree(src_dir, dst_dir)
-        shutil.copytree(q_dir, dst_dir2)
