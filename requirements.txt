@@ -7,3 +7,4 @@ nltk
 notion-client
 langchain-openai
 openai
+streamlit

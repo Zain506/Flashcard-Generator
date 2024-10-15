@@ -84,7 +84,7 @@ class Extractor:
     def _storeText(self, text: str, filename: str) -> None:
         """Temporarily store as text"""
         os.makedirs(f"experiments/{self.folder}/output/", exist_ok = True)
-        with open(f"experiments/{self.folder}/output/{filename}", "w") as file:
+        with open(f"experiments/{self.folder}/output/{filename}", "w", encoding="utf-8") as file:
             start = text.index("{")
             end = text.rindex("}") + 1
             data = text[start:end]
