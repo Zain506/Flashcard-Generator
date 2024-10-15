@@ -1,87 +1,92 @@
-"""Notion API toggle uploading class"""
+import re
 from dotenv import load_dotenv
 import os
 from notion_client import Client
-from typing import List
-import json
-import re
-load_dotenv()
-
+import copy
 class Notion:
-    """Add a toggle block to Notion page with a given ID"""
+    """Transfer the text directly from the .yaml files to Notion"""
     def __init__(self, folder: str, pageID: str):
         self.folder = folder
         self.id = pageID
+    
     def run(self):
-        data: list[dict] = self._loadDict()
-        for chunk in data:
-            form: List[dict] = self._makeBlocks()
-            for key, value in chunk.items():
-                toggle: dict = self._template(key, value)
-                form.append(toggle)
-        # form is the list of blocks
-        # self._setup(form)
-            newform: List[List[dict]] = self._splitBlocks(form)
-            for tmp in newform:
-                self._setup(tmp)
-    def _loadDict(self) -> list[dict]:
-        myList: list[dict] = []
         for chunk in os.listdir(f"experiments/{self.folder}/output/"):
-            myDict: dict = {}
-            with open(f"experiments/{self.folder}/output/{chunk}", "r") as json_file:
-                content = json_file.read()
-                dictionary: str = json.loads(content)
-                dictionary = dictionary.replace('\\', '\\\\')
-                dictionary = json.loads(dictionary)
-                for key, value in dictionary.items():
-                    myDict[key] = value
-                myList.append(myDict)
-        return myList
-    def _template(self, front: str, back: str) -> dict:
-        back = back.replace("\\\\", "\\").replace("{{", "{").replace("}}", "}")
-        chars: list[str] = re.split(r'(\$\$.*?\$\$)', back)
+            print(f"Processing {chunk}")
+            path = f"experiments/{self.folder}/output/{chunk}"
+            data: list[str] = self._loadInfo(path) # list of extracted data from .txt
+            myDicts: list[dict] = self._template(data)
+            splitDicts: list[list[dict]] = self._splitBlocks(myDicts)
+            self._call(splitDicts)
+    
+    def _loadInfo(self, filepath: str) -> list[str]:
+        """Given 1 .txt file, perform regex to extract text"""
+        result: list[str] = []
+        with open(filepath) as file:
+            text = file.read()
+            pattern = r'"((?:[^"\\]|\\.)*)"'
+            matches: list[str] = re.findall(pattern, text)
+            for match in matches:
+                result.append(match.replace("\\\\", "\\"))
+            return result
+    
+    def _template(self, entities: list[str]) -> list[dict]: # entities: list[str] is a list with alternating between front and back
+        """Parse text as equation and place into JSON format"""
         text = {
                 "object": "block",
                 "type": "toggle",
                 "toggle": {
-                    "rich_text": [{"type": "text", "text": {"content": front}}],
+                    "rich_text": [], # Front of flashcard is appended to rich_text
                     "children": [
                         {
                             "object": "block",
                             "type": "paragraph",
                             "paragraph": {
-                                "rich_text": []
+                                "rich_text": [] # Back of flashcard is appended to rich_text list
                             }
                         }
                     ]
                 }
             }
-        for char in chars:
-            # print(char)
-            try:
-                if char[0] == "$" and len(char) > 4:
-                    text["toggle"]["children"][0]["paragraph"]["rich_text"].append(
-                        {"type": "equation", "equation": {"expression": char[2:-2]}}
-                    )
-                else:
-                    text["toggle"]["children"][0]["paragraph"]["rich_text"].append(
-                        {"type": "text", "text": {"content": char}}
-                    )
-            except:
-                continue
-        return text
-        
-    def _makeBlocks(self) -> List[dict]:
-        """Create initial list to add to Notion blocks"""
-        return []
-    def _splitBlocks(self, blocks: List[dict], max_length: int = 99) -> List[List[dict]]:
+        result: list[dict] = []
+        def __sort(text: dict, chars: str, back: bool) -> dict: # Adds singular entity to notion JSON object
+            """Function for singular entity"""
+            # Turn chars into list[str] separated by whether contains $$ or not
+            chars: list[str] = re.split(r'(\$\$.*?\$\$)', chars)
+            if back:
+                position = text["toggle"]["children"][0]["paragraph"]["rich_text"]
+            else:
+                position = text["toggle"]["rich_text"]
+            for char in chars:
+                if "$" in char and len(char) > 4: # Equation
+                    char = char.strip()
+                    char = char[2:-2]
+                    char = char.strip()
+                    if char == "":
+                        continue
+                    position.append({"type": "equation", "equation": {"expression": char}})
+                else: # Text
+                    position.append({"type": "text", "text": {"content": char}})
+            return text 
+        for index in range(0, len(entities), 2):
+            card = copy.deepcopy(text)
+            card = __sort(card, entities[index], back = False)
+            if index + 1 < len(entities):
+                card = __sort(card, entities[index + 1], back = True)
+            result.append(card)
+        return result
+    def _splitBlocks(self, blocks: list[dict], max_length: int = 99) -> list[list[dict]]:
         """If there are more than 100 blocks in list, split"""
         return [blocks[i:i + max_length] for i in range(0, len(blocks), max_length)]
-    def _setup(self, blocks: List[dict]):
+    
+
+    def _call(self, blocks: list[list[dict]]):
         """Make API call to Notion"""
-        NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-        notion = Client(auth=NOTION_TOKEN)
-        notion.blocks.children.append(
-        block_id=self.id,
-        children=blocks
-    )
+        
+        for block in blocks:
+            load_dotenv()
+            NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+            notion = Client(auth=NOTION_TOKEN)
+            notion.blocks.children.append(
+            block_id=self.id,
+            children=block
+            )
