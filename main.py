@@ -8,7 +8,13 @@ st.title("Simple Maths Revision Pipeline")
 st.page_link("https://snip.mathpix.com/home", label = "Click here to go to MathPix")
 
 uploaded_file = st.file_uploader("Upload a Markdown", type="md")
-
+reset = st.button("Reset")
+if reset:
+    dirs: list[str] = ["examples", "experiments", "notes"]
+    for file in dirs:
+        if os.path.isdir(file):
+            shutil.rmtree(file)
+    st.write("## Reset!")
 
 base_path: str = "tmp"
 
@@ -39,13 +45,7 @@ if uploaded_file:
         with open(os.path.join(root_dir, "examples", "prompt.txt"), "w") as file:
             file.write(question)
         run = st.button("Run")
-        reset = st.button("Reset")
-        if reset:
-            dirs: list[str] = ["examples", "experiments", "notes"]
-            for file in dirs:
-                if os.path.isdir(file):
-                    shutil.rmtree(file)
-            st.write("## Reset!")
+        
         if run: # Run pipeline when button pressed
             code = extract_code_from_url(pageID)
             Extractor(base_path).run()
