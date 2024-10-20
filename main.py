@@ -57,7 +57,10 @@ if run: # when button is pressed
             st.success("File Saved")
         # Upload system instructions if there
         with open(os.path.join(root_dir, "examples", "prompt.txt"), "w") as file:
-            file.write(sys)
+            if sys:
+                file.write(sys)
+            else:
+                pass
         success_message: str = "System Message Saved" if sys else "Default System Message used"
         st.success(success_message)
         # Run pipeline(file, pageID)

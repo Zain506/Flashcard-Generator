@@ -28,14 +28,7 @@ class Extractor:
         # Search to find prompt.txt - if not there, then return the standard examples prompt
         file_path: str = f"experiments/{self.folder}/examples/prompt.txt"
         # prompt.txt must ask for a JSON-formatted response
-        with open(file_path, 'r') as file:
-            content = file.read()
-            if content:
-                content += "\n\nEnsure the back AND the front of the cards (i.e. all key-value pairs) are strings. NOT lists, dictionaries, integers or any other data type"
-                content += "\n\nWhen including mathematical notation, use the syntax provided in the markdown text and enclose LaTeX notation in $ symbols."
-                content += "\nFor example: $\\mathcal{F}$"
-                return content
-        content = """
+        content: str = """
         Using the provided information in the user message, create flashcards for a student trying to learn this topic.
 
         Provide the solution in JSON format, where the front of the card is the key (i.e. the question) and the back is the value (i.e. the answer)
@@ -46,6 +39,11 @@ class Extractor:
 
         For example: "We define a probability space $(\\Omega, \\mathcal F, \\mathbb P)$"
         """
+        with open(file_path, 'r') as file:
+            prompt = file.read()
+            if prompt:
+                return prompt + content
+        
         return content
     
     def _getLenChunks(self) -> int:
