@@ -1,10 +1,13 @@
 from langchain_community.document_loaders import UnstructuredMarkdownLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
 from typing import List
-import re
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 class getChunks:
     """
     Get a LLM to extract useful info in dictionary format (flashcards)
@@ -14,8 +17,8 @@ class getChunks:
 
     def run(self):
         text: str = self._loadMD()
-        chunks: List[str] = self._chunk(text)
-        self._store(chunks)
+        chunks: List[Document] = self._chunk(text)
+        self._toVecDB(chunks)
     
     def _loadMD(self) -> str:
         markdown_path = f"experiments/{self.folder}/combined_notes.md"
@@ -30,14 +33,13 @@ class getChunks:
             chunk_size = 20000,
             chunk_overlap = 2000,
         )
-        chunks: List[str] = text_splitter.split_text(text)
+        chunks: List[Document] = text_splitter.create_documents([text])
         return chunks
-    # Store each chunk into a .txt file
-    def _store(self, chunks: List[str]) -> None:
-        os.makedirs(f"experiments/{self.folder}/chunks", exist_ok=True)
-        n = len(chunks)
-        for i in range(n):
-            file: str = f"experiments/{self.folder}/chunks/chunk{i}.txt"
-            text: str = chunks[i]
-            with open(file, "w", encoding = "utf-8") as file:
-                file.write(text)
+    
+    def _toVecDB(self, text: List[Document]):
+        """Store as FAISS DB"""
+        embeddings = OpenAIEmbeddings(
+            model = "text-embedding-3-small"
+            )
+        db = FAISS.from_documents(text, embeddings)
+        db.save_local(f"experiments/{self.folder}/faiss_db")

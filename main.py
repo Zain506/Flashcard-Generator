@@ -5,10 +5,10 @@ import shutil
 import streamlit as st
 from src import *
 st.title("Simple Maths Revision Pipeline")
-
+st.page_link("https://snip.mathpix.com/home", label = "MathPix")
 pageID = st.text_input("Notion Page URL")
 uploaded_file = st.file_uploader("Upload a Markdown", type="md")
-sys = st.text_input("(Optional) System Instructions")
+sys = st.text_area("(Optional) System Instructions")
 run = st.button("Run Pipeline...")
 reset = st.button("Reset directories")
 
