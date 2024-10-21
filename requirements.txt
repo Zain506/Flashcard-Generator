@@ -8,3 +8,4 @@ notion-client
 langchain-openai
 openai
 streamlit
+faiss-cpu
