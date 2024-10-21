@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import shutil
 import streamlit as st
@@ -54,6 +55,8 @@ if uploaded_file:
         if run: # Run pipeline when button pressed
             code = extract_code_from_url(pageID)
             Extractor(base_path).run()
+            with open(f"experiments/{base_path}/output/response.json", "r") as file:
+                st.write(json.dumps(file, indent = 4))
             Notion(base_path, code).run()
             dirs: list[str] = ["examples", "experiments", "notes"]
             for file in dirs:
