@@ -26,9 +26,14 @@ def extract_code_from_url(url: str):
 root_dir = os.path.dirname(os.path.join(os.path.abspath(__file__)))
 # os.makedirs(experiments_dir)
 # Create directories
-os.makedirs(os.path.join(root_dir, "notes"), exist_ok=True)
-os.makedirs(os.path.join(root_dir, "examples"), exist_ok=True)
-os.makedirs(os.path.join(root_dir, "experiments", "tmp_file", "output"), exist_ok=True)
+def clean(dir: str):
+    if os.path.exists(os.path.join(root_dir, dir)):
+        shutil.rmtree(os.path.join(root_dir, dir))
+    os.makedirs(os.path.join(root_dir, dir))
+
+clean("notes")
+clean("examples")
+clean("experiments")
 
 
 
@@ -42,7 +47,7 @@ if uploaded_file:
     pageID = st.text_input("Notion Page URL")
     question = st.text_area("Query")
     if pageID and question:
-        with open(os.path.join(root_dir, "examples", "prompt.txt"), "w") as file:
+        with open(os.path.join(root_dir, "experiments", base_path, "examples", "prompt.txt"), "w") as file:
             file.write(question)
         run = st.button("Run")
         

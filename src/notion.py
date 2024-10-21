@@ -49,13 +49,13 @@ class Notion:
                 "object": "block",
                 "type": "toggle",
                 "toggle": {
-                    "rich_text": [__toText(item) if i % 2 == 0 else __toLatex(item) for i, item in enumerate(key)], # Front of flashcard is appended to rich_text
+                    "rich_text": [__toText(item) if (i % 2 == 0 if key[0] != "$" else i % 2 == 1) else __toLatex(item) for i, item in enumerate(key)], # Front of flashcard is appended to rich_text
                     "children": [
                         {
                             "object": "block",
                             "type": "paragraph",
                             "paragraph": {
-                                "rich_text": [__toText(item) if i % 2 == 0 else __toLatex(item) for i, item in enumerate(value)] # Back of flashcard is appended to rich_text list
+                                "rich_text": [__toText(item) if (i % 2 == 0 if value[0] != "$" else i % 2 == 1) else __toLatex(item) for i, item in enumerate(value)] # Back of flashcard is appended to rich_text list
                             }
                         }
                     ]
