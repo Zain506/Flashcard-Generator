@@ -38,7 +38,7 @@ class Extractor:
     # Construct system and message prompts to query
     def _chain(self, prompt: str, db):
         plate: str = """
-Answer only the question I ask you. Answer the question based only on the following context:
+Answer the question based only on the following context:
 
 {context}
 
