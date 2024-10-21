@@ -26,9 +26,9 @@ def extract_code_from_url(url: str):
 root_dir = os.path.dirname(os.path.join(os.path.abspath(__file__)))
 # os.makedirs(experiments_dir)
 # Create directories
-# os.makedirs(os.path.join(root_dir, "notes"), exist_ok=True)
-# os.makedirs(os.path.join(root_dir, "examples"), exist_ok=True)
-# os.makedirs(os.path.join(root_dir, "experiments", "tmp_file", "output"), exist_ok=True)
+os.makedirs(os.path.join(root_dir, "notes"), exist_ok=True)
+os.makedirs(os.path.join(root_dir, "examples"), exist_ok=True)
+os.makedirs(os.path.join(root_dir, "experiments", "tmp_file", "output"), exist_ok=True)
 
 
 
