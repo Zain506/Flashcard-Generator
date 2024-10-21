@@ -47,7 +47,7 @@ if uploaded_file:
     pageID = st.text_input("Notion Page URL")
     question = st.text_area("Query")
     if pageID and question:
-        with open(os.path.join(root_dir, "examples", "prompt.txt"), "w") as file:
+        with open(os.path.join(root_dir, "experiments", base_path, "examples", "prompt.txt"), "w") as file:
             file.write(question)
         run = st.button("Run")
         
